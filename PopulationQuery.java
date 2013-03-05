@@ -5,6 +5,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.DecimalFormat;
 
+/**
+ * This class can be used to parse a data file into usable
+ * US census population data.  It can then process queries,
+ * to provide information about the population in specific
+ * areas of the US.
+ */
 public class PopulationQuery {
     // next four constants are relevant to parsing
     public static final int TOKENS_PER_LINE  = 7;
