@@ -127,20 +127,20 @@ public class PopulationQuery {
         return new Pair<Integer, Float>(areaPop, (float) (100*areaPop/imp.getPop() ));
     }
     public static void preprocess(String filename, int columns, int rows, int versionNum) {
-        CensusData data = parse(filename);
-        if(versionNum == 1) {
-            imp = new SimpleAndSequential(rows, columns, data);
+//        CensusData data = parse(filename);
+//        if(versionNum == 1) {
+//            imp = new SimpleAndSequential(rows, columns, data);
             imp.preprocess();
-        } else if (versionNum == 2) {
-        	imp = null;
-        } else if (versionNum == 3) {
-        	imp = null;
-        } else if (versionNum == 4) {
-        	imp = null;
-        } else if (versionNum == 5) {
-        	imp = null;
-        } else {
-        	imp = null;
-        }
+//        } else if (versionNum == 2) {
+//        	imp = null;
+//        } else if (versionNum == 3) {
+//        	imp = null;
+//        } else if (versionNum == 4) {
+//        	imp = null;
+//        } else if (versionNum == 5) {
+//        	imp = null;
+//        } else {
+//        	imp = null;
+//        }
     }
 }
