@@ -12,14 +12,14 @@ public class PopulationQuery {
     public static final int LONGITUDE_INDEX  = 6;
     private static Implementation imp;
 
-    private static void query(Implementation imp, int west, int south, int east, int north) {
-        while (true) {
-            imp.query(west, south, east, north);
-        }
-    }
-    private static void preprocess(Implementation imp, int row, int columns) {
-        imp.preprocess();
-    }
+//    private static void query(Implementation imp, int west, int south, int east, int north) {
+//        while (true) {
+//            imp.query(west, south, east, north);
+//        }
+//    }
+//    private static void preprocess(Implementation imp, int row, int columns) {
+//        imp.preprocess();
+//    }
 
     // parse the input file into a large array held in a CensusData object
     public static CensusData parse(String filename) {
@@ -74,23 +74,20 @@ public class PopulationQuery {
         String version = args[3];
 
         CensusData data = parse(fileName);
-        Implementation imp;
         int x = Integer.parseInt(xNum);
         int y = Integer.parseInt(yNum);
         if(version.equals("-v1")) {
             imp = new SimpleAndSequential(x, y, data);
         } else if(version.equals("-v2")) {
-
+        	imp = null;
         } else if(version.equals("-v3")) {
-
+        	imp = null;
         } else if(version.equals("-v4")) {
-
+        	imp = null;
         } else if(version.equals("-v5")) {
-
-
+        	imp = null;
         } else {
-
-
+        	imp = null;
         }
         imp.preprocess();
 
@@ -117,43 +114,33 @@ public class PopulationQuery {
                 int south = Integer.parseInt(coordinates[1]);
                 int east = Integer.parseInt(coordinates[2]);
                 int north = Integer.parseInt(coordinates[3]);
-                int x = Integer.parseInt(xNum);
-                int y = Integer.parseInt(yNum);
 
-                if(version.equals("-v1")) {
-                    SimpleAndSequential ss = new SimpleAndSequential(x, y, data);
-                    System.out.println(ss.preprocess());
-                    System.out.println(ss.query(west, south, east, north));
-                } else if(version.equals("-v2")) {
-                    System.out.println("Version 2 is not implemented yet");
-                    fourArgs = false; //exit the loop
-                } else if(version.equals("-v3")) {
-                    System.out.println("Version 3 is not implemented yet");
-                    fourArgs = false; //exit the loop
-                } else if(version.equals("-v4")) {
-                    System.out.println("Version 4 is not implemented yet");
-                    fourArgs = false; //exit the loop
-                } else if(version.equals("-v5")) {
-                    System.out.println("Version 5 is not implemented yet");
-                    fourArgs = false; //exit the loop
-                } else {
-                    System.out.println("No such version!");
-                    fourArgs = false; //exit the loop
-                }
+                Pair<Integer,Float> p = singleInteraction(west,south,east,north);
+               	System.out.println("population of rectangle: "+p.getElementA());
+               	System.out.println("percent of total population: "+p.getElementB());
             }
         }
     }
     public static Pair<Integer, Float> singleInteraction(int w, int s, int e, int n) {
         // TODO Auto-generated method stub
         int areaPop= imp.query(w, s, e, n);
-        return new Pair<Integer, Float>(areaPop, (float) (areaPop/imp.getPop() ));
+        return new Pair<Integer, Float>(areaPop, (float) (100*areaPop/imp.getPop() ));
     }
     public static void preprocess(String filename, int columns, int rows, int versionNum) {
         CensusData data = parse(filename);
         if(versionNum == 1) {
             imp = new SimpleAndSequential(rows, columns, data);
-
             imp.preprocess();
+        } else if (versionNum == 2) {
+        	imp = null;
+        } else if (versionNum == 3) {
+        	imp = null;
+        } else if (versionNum == 4) {
+        	imp = null;
+        } else if (versionNum == 5) {
+        	imp = null;
+        } else {
+        	imp = null;
         }
     }
 }
