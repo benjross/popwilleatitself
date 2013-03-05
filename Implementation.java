@@ -28,7 +28,6 @@ public interface Implementation {
     /**
      * Parses the data file, and counts the total population.
      * grid.
-     * 
      */
     public void preprocess();
 
@@ -37,7 +36,7 @@ public interface Implementation {
      * a preprocess() has been called, otherwise this method has undefined
      * behavior.
      * 
-     * @requires requires call prior call to preprocess().
+     * @requires requires prior call to preprocess().
      * @return the total population.
      */
     public int getPop();
