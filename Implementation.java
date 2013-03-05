@@ -1,4 +1,10 @@
-
+/**
+ * An interface for an implementation of completing
+ * population queries.  Each implementation must be able
+ * to process the data and set up the initial grid, find
+ * the population of a specific area in the US, and find
+ * the total population of the US.
+ */
 public interface Implementation {
 	
 	/**
@@ -16,7 +22,6 @@ public interface Implementation {
     /**
      * Parses the data file, and sets up the initial population
      * grid.
-     * 
      */
     public void preprocess();
     
