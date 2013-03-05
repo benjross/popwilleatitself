@@ -79,12 +79,4 @@ public class SimpleAndSequential  implements Implementation {
     public int getPop() {
         return totalPopulation;
     }
-
-    public boolean queryChecker(int west, int south, int east, int north) {
-        return !(west < 1 || west > x ||
-                south < 1 || south > y ||
-                east < west || east > x ||
-                north < south || north > y);
-    }
-
 }
