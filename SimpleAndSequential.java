@@ -2,8 +2,6 @@
 public class SimpleAndSequential  implements Implementation {
     private final int x;
     private final int y;
-    private float gridX;
-    private float gridY;
     private Rectangle america;
     private final CensusData censusData;
     int totalPopulation;
@@ -19,33 +17,51 @@ public class SimpleAndSequential  implements Implementation {
      */
 
 
+    public SimpleAndSequential(int x, int y, CensusData data) {
+        this.x = x;
+        this.y = y;
+        this.censusData = data;
+        totalPopulation = 0;
+    }
+
     @Override
     public int query(int west, int south, int east, int north) {
         CensusGroup group;
         int population = 0;
-        double gLong, gLat;
+        double groupLong, groupLat;
+        float yAxis = america.left;
+        float xAxis = america.bottom;
+        float gridSquareWidth = (america.right - america.left) / x;
+        float gridSquareHeight = (america.top - america.bottom) / y;
+        double leftBound = (yAxis + (west - 1) * gridSquareWidth);
+        double rightBound = (yAxis + (east) * gridSquareWidth);
+        double topBound = (xAxis + (north) * gridSquareHeight);
+        double bottomBound = (xAxis + (south - 1) * gridSquareHeight);
         for (int i = 0; i < censusData.data_size; i++) {
             group = censusData.data[i];
-            gLong = group.longitude;
-            gLat = group.latitude;
-            if (gLat >= (america.bottom + (south - 1) * gridY) &&
-                    gLat <= (america.bottom + (north - 1) * gridY) &&
-                    gLong <= (america.left + (east- 1) * gridX) &&
-                    gLong >= (america.left + (west - 1) * gridX)
+            groupLong = group.longitude;
+            groupLat = group.latitude;
+            // Defaults to North and/or East in case of tie
+            if (groupLat >= bottomBound &&
+                    groupLat <= topBound &&
+                    groupLong <= rightBound &&
+                    groupLong >= leftBound
                     )
                 population += group.population;
         }
+
         return population;
     }
 
-    // maybe modify to use rectangle
     @Override
     public void preprocess() {
         int pop = 0;
         CensusGroup group = censusData.data[0];
+
         Rectangle rec = new Rectangle(group.longitude, group.longitude,
                 group.latitude, group.latitude), temp;
         pop += group.population;
+
         for (int i = 1; i < censusData.data_size; i++) {
             group = censusData.data[i];
             temp = new Rectangle(group.longitude, group.longitude,
@@ -53,10 +69,15 @@ public class SimpleAndSequential  implements Implementation {
             rec = rec.encompass(temp);
             pop += group.population;
         }
-        gridX = (rec.right - rec.left) / x;
-        gridY = (rec.top - rec.bottom) / y;
+
         america = rec;
         totalPopulation = pop;
+    }
+
+
+    @Override
+    public int getPop() {
+        return totalPopulation;
     }
 
     public boolean queryChecker(int west, int south, int east, int north) {
@@ -66,17 +87,4 @@ public class SimpleAndSequential  implements Implementation {
                 north < south || north > y);
     }
 
-    public SimpleAndSequential(int x, int y, CensusData data) {
-        this.x = x;
-        this.y = y;
-        gridX = 0;
-        gridY = 0;
-        this.censusData = data;
-        totalPopulation = 0;
-    }
-
-    @Override
-    public int getPop() {
-        return totalPopulation;
-    }
 }
