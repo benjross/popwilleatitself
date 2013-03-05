@@ -12,8 +12,10 @@ public class TestImplementations {
 	@Before
 	public void setUp() throws Exception {
 		CensusData data = PopulationQuery.parse("CenPop2010.txt");
-		imp1 = new SimpleAndSequential(20,25,data); imp1Other = new SimpleAndSequential(9,14,data);
-		imp2 = new SimpleAndParallel(20,25,data); imp2Other = new SimpleAndParallel(9,14,data);
+		imp1 = new SimpleAndSequential(20,25,data); imp1.preprocess();
+		imp1Other = new SimpleAndSequential(9,14,data); imp1Other.preprocess();
+		imp2 = new SimpleAndParallel(20,25,data); imp2.preprocess();
+		imp2Other = new SimpleAndParallel(9,14,data); imp2Other.preprocess();
 	}
 	
 	@Test(timeout = TIMEOUT)
