@@ -77,19 +77,18 @@ public class PopulationQuery {
         int x = Integer.parseInt(xNum);
         int y = Integer.parseInt(yNum);
         if(version.equals("-v1")) {
-            imp = new SimpleAndSequential(x, y, data);
+            preprocess(fileName,x,y,1);
         } else if(version.equals("-v2")) {
-        	imp = null;
+        	preprocess(fileName,x,y,2);
         } else if(version.equals("-v3")) {
-        	imp = null;
+        	preprocess(fileName,x,y,3);
         } else if(version.equals("-v4")) {
-        	imp = null;
+        	preprocess(fileName,x,y,4);
         } else if(version.equals("-v5")) {
-        	imp = null;
+        	preprocess(fileName,x,y,5);
         } else {
         	imp = null;
         }
-        imp.preprocess();
 
         boolean fourArgs = true;
         while(fourArgs) {
@@ -127,20 +126,20 @@ public class PopulationQuery {
         return new Pair<Integer, Float>(areaPop, (float) (100*areaPop/imp.getPop() ));
     }
     public static void preprocess(String filename, int columns, int rows, int versionNum) {
-//        CensusData data = parse(filename);
-//        if(versionNum == 1) {
-//            imp = new SimpleAndSequential(rows, columns, data);
+        CensusData data = parse(filename);
+        if(versionNum == 1) {
+            imp = new SimpleAndSequential(rows, columns, data);
             imp.preprocess();
-//        } else if (versionNum == 2) {
-//        	imp = null;
-//        } else if (versionNum == 3) {
-//        	imp = null;
-//        } else if (versionNum == 4) {
-//        	imp = null;
-//        } else if (versionNum == 5) {
-//        	imp = null;
-//        } else {
-//        	imp = null;
-//        }
+        } else if (versionNum == 2) {
+        	imp = null;
+        } else if (versionNum == 3) {
+        	imp = null;
+        } else if (versionNum == 4) {
+        	imp = null;
+        } else if (versionNum == 5) {
+        	imp = null;
+        } else {
+        	imp = null;
+        }
     }
 }
