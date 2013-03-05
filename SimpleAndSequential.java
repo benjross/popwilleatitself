@@ -1,11 +1,12 @@
 
-public class SimpleAndSequential {
+public class SimpleAndSequential  implements Implementation {
     private final int x;
     private final int y;
     private float gridX;
     private float gridY;
-    private int totalPop;
+    private Rectangle america;
     private final CensusData censusData;
+    int totalPopulation;
     /*
      * Before processing any queries, process the data to find the four corners
      * of the U.S. rectangle using a sequential O(n) algorithm where n is the
@@ -18,44 +19,44 @@ public class SimpleAndSequential {
      */
 
 
+    @Override
     public int query(int west, int south, int east, int north) {
         CensusGroup group;
         int population = 0;
-        float gLong, gLat;
+        double gLong, gLat;
         for (int i = 0; i < censusData.data_size; i++) {
             group = censusData.data[i];
             gLong = group.longitude;
             gLat = group.latitude;
-            if (gLong >= (south * gridY)  &&
-                    gLong < (north * gridY) &&
-                    gLat > (east * gLat) &&
-                    gLat <= (west * gLat))
+            if (gLat >= (america.bottom + (south - 1) * gridY) &&
+                    gLat <= (america.bottom + (north - 1) * gridY) &&
+                    gLong <= (america.left + (east- 1) * gridX) &&
+                    gLong >= (america.left + (west - 1) * gridX)
+                    )
                 population += group.population;
         }
         return population;
     }
 
     // maybe modify to use rectangle
-    public int preprocess(CensusData data) {
-        CensusGroup group = data.data[0];
-        float west, east, north, south;
-        west = east = group.latitude;
-        north = south = group.longitude;
-        for (int i = 1; i < data.data_size; i++) {
-            group = data.data[i];
-            if (group.longitude < south)
-                south = group.longitude;
-            if (group.longitude > north)
-                north = group.longitude;
-            if (group.latitude < east)
-                east = group.latitude;
-            if (group.latitude > west)
-                west = group.latitude;
-            totalPop += group.population;
+    @Override
+    public void preprocess() {
+        int pop = 0;
+        CensusGroup group = censusData.data[0];
+        Rectangle rec = new Rectangle(group.longitude, group.longitude,
+                group.latitude, group.latitude), temp;
+        pop += group.population;
+        for (int i = 1; i < censusData.data_size; i++) {
+            group = censusData.data[i];
+            temp = new Rectangle(group.longitude, group.longitude,
+                    group.latitude, group.latitude);
+            rec = rec.encompass(temp);
+            pop += group.population;
         }
-        gridX = (west - east) / x;
-        gridY = (north - south) / y;
-        return totalPop;
+        gridX = (rec.right - rec.left) / x;
+        gridY = (rec.top - rec.bottom) / y;
+        america = rec;
+        totalPopulation = pop;
     }
 
     public boolean queryChecker(int west, int south, int east, int north) {
@@ -71,6 +72,11 @@ public class SimpleAndSequential {
         gridX = 0;
         gridY = 0;
         this.censusData = data;
-        totalPop = 0;
+        totalPopulation = 0;
+    }
+
+    @Override
+    public int getPop() {
+        return totalPopulation;
     }
 }
