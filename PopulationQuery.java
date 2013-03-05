@@ -3,6 +3,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 
 public class PopulationQuery {
     // next four constants are relevant to parsing
@@ -12,16 +13,13 @@ public class PopulationQuery {
     public static final int LONGITUDE_INDEX  = 6;
     private static Implementation imp;
 
-//    private static void query(Implementation imp, int west, int south, int east, int north) {
-//        while (true) {
-//            imp.query(west, south, east, north);
-//        }
-//    }
-//    private static void preprocess(Implementation imp, int row, int columns) {
-//        imp.preprocess();
-//    }
-
-    // parse the input file into a large array held in a CensusData object
+    /**
+     * parse the input file into a large array held 
+     * in a CensusData object.
+     * 
+     * @param filename the file to be parsed.
+     * @return a CensusData object holding the parsed data.
+     */
     public static CensusData parse(String filename) {
         CensusData result = new CensusData();
 
@@ -63,17 +61,22 @@ public class PopulationQuery {
         return result;
     }
 
-    // argument 1: file name for input data: pass this to parse
-    // argument 2: number of x-dimension buckets
-    // argument 3: number of y-dimension buckets
-    // argument 4: -v1, -v2, -v3, -v4, or -v5
+    /**
+     * Asks the user for input, processes the query, and
+     * outputs the group population and percentage of the
+     * total population.
+     * 
+     * @param args[0] file name for input data: pass this to parse
+     * @param args[1] number of x-dimension buckets
+     * @param args[2] number of y-dimension buckets
+     * @param args[3] -v1, -v2, -v3, -v4, or -v5
+     */
     public static void main(String[] args) {
         String fileName = args[0];
         String xNum = args[1];
         String yNum = args[2];
         String version = args[3];
 
-        CensusData data = parse(fileName);
         int x = Integer.parseInt(xNum);
         int y = Integer.parseInt(yNum);
         if(version.equals("-v1")) {
@@ -113,25 +116,54 @@ public class PopulationQuery {
                 int south = Integer.parseInt(coordinates[1]);
                 int east = Integer.parseInt(coordinates[2]);
                 int north = Integer.parseInt(coordinates[3]);
-
+                
+                if(queryChecker(west,south,east,north,x,y))
+                	throw new IndexOutOfBoundsException("One or more group coordinate is outside the bounds of the grid");
+                
+                DecimalFormat df = new DecimalFormat("0.00");
+                
                 Pair<Integer,Float> p = singleInteraction(west,south,east,north);
                	System.out.println("population of rectangle: "+p.getElementA());
-               	System.out.println("percent of total population: "+p.getElementB());
+               	String percent = df.format(p.getElementB());
+               	System.out.println("percent of total population: "+percent);
             }
         }
     }
+    
+    /**
+     * Processes a query, and returns the population of the group and
+     * the percent of the total population.
+     * 
+     * @param w the west coordinate of the group.
+     * @param s the south coordinate of the group.
+     * @param e the east coordinate of the group.
+     * @param n the north coordinate of the group.
+     * @return a Pair holding the group's population, and the
+     * 		   percent of the total population.
+     */
     public static Pair<Integer, Float> singleInteraction(int w, int s, int e, int n) {
-        // TODO Auto-generated method stub
         int areaPop= imp.query(w, s, e, n);
-        return new Pair<Integer, Float>(areaPop, (float) (100*areaPop/imp.getPop() ));
+        return new Pair<Integer, Float>(areaPop, (100*(float)areaPop/(float)imp.getPop() ));
     }
+    
+    /**
+     * Parses the data file, and sets up the initial population
+     * grid.
+     * 
+     * @param filename the file to be parsed.
+     * @param columns the number of columns in the grid.
+     * @param rows the number of rows in the grid.
+     * @param versionNum 1-5, chooses which implementation of the
+     * 		  program to use.
+     */
     public static void preprocess(String filename, int columns, int rows, int versionNum) {
         CensusData data = parse(filename);
         if(versionNum == 1) {
-            imp = new SimpleAndSequential(rows, columns, data);
+            imp = new SimpleAndSequential(columns, rows, data);
             imp.preprocess();
         } else if (versionNum == 2) {
-        	imp = null;
+        	imp = new SimpleAndParallel(columns, rows, data);
+        	imp.preprocess();
         } else if (versionNum == 3) {
         	imp = null;
         } else if (versionNum == 4) {
@@ -141,5 +173,25 @@ public class PopulationQuery {
         } else {
         	imp = null;
         }
+    }
+    
+    /**
+     * Decides whether or not a query is valid, by checking
+     * to make sure all the desired group coordinates are inside
+     * the bounds of the grid.
+     * 
+     * @param west the west coordinate of the group.
+     * @param south the south coordinate of the group.
+     * @param east the east coordinate of the group.
+     * @param north the north coordinate of the group.
+     * @param x the number of columns in the grid.
+     * @param y the number of rows in the grid.
+     * @return true if the query is valid, false otherwise.
+     */
+    public static boolean queryChecker(int west, int south, int east, int north, int x, int y) {
+        return (west < 1 || west > x ||
+                south < 1 || south > y ||
+                east < west || east > x ||
+                north < south || north > y);
     }
 }
