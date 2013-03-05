@@ -1,22 +1,35 @@
+/*
+ * Ben Ross (Primary Author)
+ * Jordan Hazari
+ * 3/5/13
+ * CSE 332 AC
+ * Daniel Jones
+ * Project 3 part A
+ */
 
-public class SimpleAndSequential  implements Implementation {
+/**
+ * SimpleAndSequential implements the Implementation interface to provide
+ * functionality for finding information about a population.  The constructor
+ * takes in the number of rows, the number of columns, and the CensusData of
+ * the population.
+ * 
+ * @author benross
+ */
+public class SimpleAndSequential implements Implementation {
     private final int x;
     private final int y;
     private Rectangle america;
     private final CensusData censusData;
     int totalPopulation;
-    /*
-     * Before processing any queries, process the data to find the four corners
-     * of the U.S. rectangle using a sequential O(n) algorithm where n is the
-     * number of census-block-groups.  Then for each query do another
-     * sequential O(n) traversal to answer the query (determining for each
-     * census-block-group whether or not it is in the query rectangle).
-     * The simplest and most reusable approach for each census-block-group is
-     * probably to first compute what grid position it is in and then see if
-     * this grid position is in the query rectangle.
+
+    /**
+     * Creates a SimpleAndSequential object to provide population query
+     * functions.
+     * 
+     * @param x The number of columns
+     * @param y The number of rows
+     * @param data The CensusData object to be queried
      */
-
-
     public SimpleAndSequential(int x, int y, CensusData data) {
         this.x = x;
         this.y = y;
@@ -24,6 +37,7 @@ public class SimpleAndSequential  implements Implementation {
         totalPopulation = 0;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int query(int west, int south, int east, int north) {
         CensusGroup group;
@@ -53,6 +67,7 @@ public class SimpleAndSequential  implements Implementation {
         return population;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void preprocess() {
         int pop = 0;
@@ -74,7 +89,7 @@ public class SimpleAndSequential  implements Implementation {
         totalPopulation = pop;
     }
 
-
+    /** {@inheritDoc} */
     @Override
     public int getPop() {
         return totalPopulation;

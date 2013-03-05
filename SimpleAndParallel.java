@@ -1,3 +1,21 @@
+/*
+ * Ben Ross (Primary Author)
+ * Jordan Hazari
+ * 3/5/13
+ * CSE 332 AC
+ * Daniel Jones
+ * Project 3 part A
+ */
+
+/**
+ * SimpleAndParallel implements the Implementation interface to provide
+ * functionality for finding information about a population.  The constructor
+ * takes in the number of rows, the number of columns, and the CensusData of
+ * the population.
+ * 
+ * @author benross
+ */
+
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
 
@@ -6,7 +24,7 @@ public class SimpleAndParallel implements Implementation {
     private final int y;
     private Rectangle america;
     private final CensusData censusData;
-    int totalPopulation; //312471327
+    int totalPopulation;
 
     /*
      * This version is the same as version 1 except both the initial
@@ -103,8 +121,10 @@ public class SimpleAndParallel implements Implementation {
 
                 return population;
             } else {
-                Query left = new Query(lo, (hi+lo)/2, west, south, east, north);
-                Query right = new Query((hi+lo)/2, hi, west, south, east, north);
+                Query left =
+                        new Query(lo, (hi+lo)/2, west, south, east, north);
+                Query right =
+                        new Query((hi+lo)/2, hi, west, south, east, north);
 
                 left.fork(); // fork a thread and calls compute
                 Integer rightAns = right.compute();//call compute directly
@@ -115,6 +135,14 @@ public class SimpleAndParallel implements Implementation {
         }
     }
 
+    /**
+     * Creates a SimpleAndParallel object to provide population query
+     * functions.
+     * 
+     * @param x The number of columns
+     * @param y The number of rows
+     * @param data The CensusData object to be queried
+     */
     public SimpleAndParallel(int x, int y, CensusData data) {
         this.x = x;
         this.y = y;
@@ -122,13 +150,17 @@ public class SimpleAndParallel implements Implementation {
         totalPopulation = 0;
     }
 
+    // for parallel programming!
     static final ForkJoinPool fjPool = new ForkJoinPool();
 
+    /** {@inheritDoc} */
     @Override
     public int query(int west, int south, int east, int north) {
-        return fjPool.invoke(new Query(0, censusData.data_size, west, south, east, north));
+        return fjPool.invoke(
+                new Query(0, censusData.data_size, west, south, east, north));
     }
 
+    /** {@inheritDoc} */
     @Override
     public void preprocess() {
         Result res = fjPool.invoke(new Preprocessor(0, censusData.data_size));
@@ -136,6 +168,7 @@ public class SimpleAndParallel implements Implementation {
         totalPopulation = res.population;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getPop() {
         return totalPopulation;
