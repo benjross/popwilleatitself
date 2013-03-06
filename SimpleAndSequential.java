@@ -39,7 +39,7 @@ public class SimpleAndSequential extends PopulationQueryVerison {
         int population = 0;
         double groupLong, groupLat;
 
-        // Grid bounds ofquery
+        // Grid bounds of query
         double leftBound = (yAxis + (west - 1) * gridSquareWidth);
         double rightBound = (yAxis + (east) * gridSquareWidth);
         double topBound = (xAxis + (north) * gridSquareHeight);

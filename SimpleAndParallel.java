@@ -45,7 +45,8 @@ public class SimpleAndParallel extends PopulationQueryVerison {
     @SuppressWarnings("serial")
     class Preprocessor extends RecursiveTask<Result> {
         int hi, lo;
-        // Look at data from range lo to hi
+
+        // Look at data from lo (inlcusive) to hi (exclusive)
         Preprocessor(int lo, int hi) {
             this.lo  = lo;
             this.hi = hi;
@@ -81,10 +82,12 @@ public class SimpleAndParallel extends PopulationQueryVerison {
         }
     }
 
-    // An internal class for preprocessing
+    // An internal class for querying
     @SuppressWarnings("serial")
     class Query extends RecursiveTask<Integer> {
         int hi, lo, west, south, east, north;
+
+        // Look at data from lo (inclusive) to hi (exclusive)
         Query(int lo, int hi, int west, int south, int east, int north) {
             this.lo  = lo;
             this.hi = hi;
