@@ -15,13 +15,7 @@
  * 
  * @author benross
  */
-public class SimpleAndSequential implements Implementation {
-    private final int x;
-    private final int y;
-    private Rectangle america;
-    private final CensusData censusData;
-    int totalPopulation;
-
+public class SimpleAndSequential extends PopulationQueryVerison {
     /**
      * Creates a SimpleAndSequential object to provide population query
      * functions.
@@ -31,15 +25,15 @@ public class SimpleAndSequential implements Implementation {
      * @param data The CensusData object to be queried
      */
     public SimpleAndSequential(int x, int y, CensusData data) {
-        this.x = x;
-        this.y = y;
-        this.censusData = data;
-        totalPopulation = 0;
+        super(x, y, data);
     }
 
     /** {@inheritDoc} */
     @Override
     public int query(int west, int south, int east, int north) {
+        if (america == null)
+            return 0;
+
         CensusGroup group;
         int population = 0;
         double groupLong, groupLat;
@@ -70,6 +64,9 @@ public class SimpleAndSequential implements Implementation {
     /** {@inheritDoc} */
     @Override
     public void preprocess() {
+        if (censusData.data_size == 0)
+            return;
+
         int pop = 0;
         CensusGroup group = censusData.data[0];
 
@@ -87,11 +84,5 @@ public class SimpleAndSequential implements Implementation {
 
         america = rec;
         totalPopulation = pop;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int getPop() {
-        return totalPopulation;
     }
 }

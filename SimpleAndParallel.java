@@ -7,6 +7,9 @@
  * Project 3 part A
  */
 
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveTask;
+
 /**
  * SimpleAndParallel implements the Implementation interface to provide
  * functionality for finding information about a population.  The constructor
@@ -15,16 +18,18 @@
  * 
  * @author benross
  */
-
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.RecursiveTask;
-
-public class SimpleAndParallel implements Implementation {
-    private final int x;
-    private final int y;
-    private Rectangle america;
-    private final CensusData censusData;
-    int totalPopulation;
+public class SimpleAndParallel extends PopulationQueryVerison {
+    /**
+     * Creates a SimpleAndParallel object to provide population query
+     * functions.
+     * 
+     * @param x The number of columns
+     * @param y The number of rows
+     * @param data The CensusData object to be queried
+     */
+    public SimpleAndParallel(int x, int y, CensusData data) {
+        super(x, y, data);
+    }
 
     /*
      * This version is the same as version 1 except both the initial
@@ -35,6 +40,7 @@ public class SimpleAndParallel implements Implementation {
      * traversal.
      */
 
+    // An internal class for preprocessing
     class Result {
         Rectangle rec;
         int population;
@@ -44,13 +50,16 @@ public class SimpleAndParallel implements Implementation {
         }
     }
 
+    // An internal class for preprocessing
     @SuppressWarnings("serial")
     class Preprocessor extends RecursiveTask<Result> {
         int hi, lo;
+        // Look at data from range lo to hi
         Preprocessor(int lo, int hi) {
             this.lo  = lo;
             this.hi = hi;
         }
+        /** {@inheritDoc} */
         @Override
         protected Result compute() {
             if(hi - lo <  100) {
@@ -80,6 +89,7 @@ public class SimpleAndParallel implements Implementation {
         }
     }
 
+    // An internal class for preprocessing
     @SuppressWarnings("serial")
     class Query extends RecursiveTask<Integer> {
         int hi, lo, west, south, east, north;
@@ -91,9 +101,9 @@ public class SimpleAndParallel implements Implementation {
             this.east = east;
             this.north = north;
         }
+        /** {@inheritDoc} */
         @Override
         protected Integer compute() {
-
             if(hi - lo <  100) {
                 CensusGroup group;
                 int population = 0;
@@ -127,27 +137,12 @@ public class SimpleAndParallel implements Implementation {
                         new Query((hi+lo)/2, hi, west, south, east, north);
 
                 left.fork(); // fork a thread and calls compute
-                Integer rightAns = right.compute();//call compute directly
+                Integer rightAns = right.compute(); // call compute directly
                 Integer leftAns = left.join();
                 return rightAns + leftAns;
             }
 
         }
-    }
-
-    /**
-     * Creates a SimpleAndParallel object to provide population query
-     * functions.
-     * 
-     * @param x The number of columns
-     * @param y The number of rows
-     * @param data The CensusData object to be queried
-     */
-    public SimpleAndParallel(int x, int y, CensusData data) {
-        this.x = x;
-        this.y = y;
-        this.censusData = data;
-        totalPopulation = 0;
     }
 
     // for parallel programming!
@@ -156,6 +151,8 @@ public class SimpleAndParallel implements Implementation {
     /** {@inheritDoc} */
     @Override
     public int query(int west, int south, int east, int north) {
+        if (america == null)
+            return 0;
         return fjPool.invoke(
                 new Query(0, censusData.data_size, west, south, east, north));
     }
@@ -163,14 +160,11 @@ public class SimpleAndParallel implements Implementation {
     /** {@inheritDoc} */
     @Override
     public void preprocess() {
+        if (censusData.data_size == 0)
+            return;
+
         Result res = fjPool.invoke(new Preprocessor(0, censusData.data_size));
         america = res.rec;
         totalPopulation = res.population;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int getPop() {
-        return totalPopulation;
     }
 }
