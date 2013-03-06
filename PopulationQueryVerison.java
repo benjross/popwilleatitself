@@ -40,9 +40,9 @@ public abstract class PopulationQueryVerison {
      */
     public PopulationQueryVerison(int x, int y, CensusData data) {
         if (data == null || data.data_size == 0)
-        	throw new NullPointerException("No population to process - check your file");
-    	if (x < 1 || y < 1)
-    		throw new IndexOutOfBoundsException("positive row/column numbers expected");
+            throw new NullPointerException("No population to process - check your file");
+        if (x < 1 || y < 1)
+            throw new IndexOutOfBoundsException("positive row/column numbers expected");
         this.x = x;
         this.y = y;
         this.censusData = data;
@@ -59,6 +59,7 @@ public abstract class PopulationQueryVerison {
      * Processes a query, and returns the population of the group in the area
      * bounded by east, west, south, and north as an int.
      * 
+     * @requires requires prior call to preprocess().
      * @param west the west coordinate of the group.
      * @param south the south coordinate of the group.
      * @param east the east coordinate of the group.
@@ -71,7 +72,6 @@ public abstract class PopulationQueryVerison {
      * Parses the data file, and counts the total population.
      * grid.
      * 
-     * @requires requires prior call to preprocess().
      */
     public abstract void preprocess();
 
