@@ -27,12 +27,14 @@ public class TestImplementations {
 	public void setUp() throws Exception {
 		CensusData data = PopulationQuery.parse("CenPop2010.txt");
 		CensusData zero = PopulationQuery.parse("zeroPop.txt");
+		CensusData empty = PopulationQuery.parse("empty.txt");
 		
 		imp1 = new SimpleAndSequential(20,25,data); imp1.preprocess();
 		imp1Other = new SimpleAndSequential(9,14,data); imp1Other.preprocess();
 		imp2 = new SimpleAndParallel(20,25,data); imp2.preprocess();
 		imp2Other = new SimpleAndParallel(9,14,data); imp2Other.preprocess();
 		zeroPop = new SimpleAndSequential(20,25,zero); zeroPop.preprocess();
+		impEmpty = new SimpleAndSequential(20,25,empty);
 	}
 	
 	@Test(timeout = TIMEOUT)
@@ -91,10 +93,9 @@ public class TestImplementations {
 		assertEquals(zeroPop.query(1, 1, 20, 25), 0);
 	}
 	
-	@Test(expected = java.lang.NullPointerException.class)
+	@Test(timeout = TIMEOUT)
 	public void emptyFileThrows() {
-		CensusData empty = PopulationQuery.parse("empty.txt");
-		impEmpty = new SimpleAndSequential(20,25,empty);
+		assertEquals(impEmpty.query(1, 1, 20, 25), 0);
 	}
 	
 	@Test(expected = java.lang.IndexOutOfBoundsException.class)

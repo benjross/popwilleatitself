@@ -176,7 +176,7 @@ public class PopulationQuery {
     public static void preprocess(String filename, int columns, int rows, int versionNum) {
         CensusData data = parse(filename);
         
-        if (data == null || data.data_size == 0)
+        if (data == null)
             throw new NullPointerException("No population to process - check your file");
         if (columns < 1 || rows < 1)
             throw new IndexOutOfBoundsException("positive row/column numbers expected");
