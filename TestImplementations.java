@@ -1,13 +1,25 @@
+/*
+ * Jordan Hazari (Primary Author)
+ * Ben Ross
+ * 3/5/13
+ * CSE 332 AB
+ * Project 3 Part A
+ */
+
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
 
-
+/**
+ * This class tests the different implementations of
+ * processing queries to find the population of
+ * specific areas in the US.
+ */
 public class TestImplementations {
 	private static final int TIMEOUT = 2000; // 2000 ms = 2 s
-	Implementation imp1; Implementation imp1Other;
-	Implementation imp2; Implementation imp2Other;
+	PopulationQueryVerison imp1; PopulationQueryVerison imp1Other;
+	PopulationQueryVerison imp2; PopulationQueryVerison imp2Other;
 	
 	@Before
 	public void setUp() throws Exception {
