@@ -1,3 +1,10 @@
+/*
+ * Jordan Hazari (Primary Author)
+ * Ben Ross
+ * 3/5/13
+ * CSE 332 AB
+ * Project 3 Part A
+ */
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -17,7 +24,7 @@ public class PopulationQuery {
     public static final int POPULATION_INDEX = 4; // zero-based indices
     public static final int LATITUDE_INDEX   = 5;
     public static final int LONGITUDE_INDEX  = 6;
-    private static Implementation imp;
+    private static PopulationQueryVerison imp;
 
     /**
      * parse the input file into a large array held 
@@ -124,7 +131,8 @@ public class PopulationQuery {
                 int north = Integer.parseInt(coordinates[3]);
                 
                 if(queryChecker(west,south,east,north,x,y))
-                	throw new IndexOutOfBoundsException("One or more group coordinate is outside the bounds of the grid");
+                	throw new IndexOutOfBoundsException("One or more group"
+                			+" coordinate is outside the bounds of the grid");
                 
                 DecimalFormat df = new DecimalFormat("0.00");
                 
@@ -164,6 +172,10 @@ public class PopulationQuery {
      */
     public static void preprocess(String filename, int columns, int rows, int versionNum) {
         CensusData data = parse(filename);
+        if (data == null || data.data_size == 0) {
+        	System.out.println("No population to process - check your file");
+        	System.exit(1);
+        }
         if(versionNum == 1) {
             imp = new SimpleAndSequential(columns, rows, data);
             imp.preprocess();
