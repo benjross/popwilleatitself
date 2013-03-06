@@ -8,8 +8,8 @@
  */
 
 /**
- * Interface for an implementation of a population query object.  Provides
- * features for finding the information about geographic populations.
+ * Abstract class for an implementation of a version of a population query.
+ * Provides features for finding the information about geographic populations.
  */
 public abstract class PopulationQueryVerison {
     // The number of columns
@@ -18,10 +18,18 @@ public abstract class PopulationQueryVerison {
     protected final int y;
     // A Rectangle representing the size of America
     protected Rectangle america;
+    // Grid axises
+    protected float yAxis;
+    protected float xAxis;
+    // Grid square dimensions
+    protected float gridSquareWidth;
+    protected float gridSquareHeight;
     // The population data
     protected final CensusData censusData;
     // The total population of America
     protected int totalPopulation;
+    // Value of sequential cut-off
+    protected int cutoff;
 
     /**
      * Creates a PopulationQueryVersion
@@ -36,6 +44,11 @@ public abstract class PopulationQueryVerison {
         this.censusData = data;
         totalPopulation = 0;
         america = null;
+        yAxis = 0;
+        xAxis = 0;
+        gridSquareWidth = 0;
+        gridSquareHeight = 0;
+        cutoff = 100;
     }
 
     /**
@@ -54,6 +67,7 @@ public abstract class PopulationQueryVerison {
      * Parses the data file, and counts the total population.
      * grid.
      * 
+     * @requires requires prior call to preprocess().
      */
     public abstract void preprocess();
 
@@ -67,5 +81,13 @@ public abstract class PopulationQueryVerison {
      */
     public int getPop() {
         return totalPopulation;
+    }
+
+    /**
+     * Changes the value of the sequential cutoff
+     * @param n the new value of the cutoff
+     */
+    public void changeCutoff(int n) {
+        cutoff = n;
     }
 }

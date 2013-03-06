@@ -11,12 +11,12 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
 
 /**
- * SimpleAndParallel implements the Implementation interface to provide
+ * SimpleAndParallel extends PopulationQueryVersion to provide
  * functionality for finding information about a population.  The constructor
  * takes in the number of rows, the number of columns, and the CensusData of
  * the population.
  * 
- * @author benross
+ * @author Ben Ross
  */
 public class SimpleAndParallel extends PopulationQueryVerison {
     /**
@@ -30,15 +30,6 @@ public class SimpleAndParallel extends PopulationQueryVerison {
     public SimpleAndParallel(int x, int y, CensusData data) {
         super(x, y, data);
     }
-
-    /*
-     * This version is the same as version 1 except both the initial
-     * corner-finding and the traversal for each query should use the ForkJoin
-     * Framework effectively. The work will remain O(n), but the span should
-     * lower to O(log n). Finding the corners should require only one data
-     * traversal, and each query should require only one additional data
-     * traversal.
-     */
 
     // An internal class for preprocessing
     class Result {
@@ -59,10 +50,11 @@ public class SimpleAndParallel extends PopulationQueryVerison {
             this.lo  = lo;
             this.hi = hi;
         }
+
         /** {@inheritDoc} */
         @Override
         protected Result compute() {
-            if(hi - lo <  100) {
+            if(hi - lo <  cutoff) {
                 CensusGroup group = censusData.data[lo];
                 int pop = group.population;
                 Rectangle rec = new Rectangle(group.longitude, group.longitude,
@@ -101,21 +93,21 @@ public class SimpleAndParallel extends PopulationQueryVerison {
             this.east = east;
             this.north = north;
         }
+
         /** {@inheritDoc} */
         @Override
         protected Integer compute() {
-            if(hi - lo <  100) {
+            if(hi - lo <  cutoff) {
                 CensusGroup group;
                 int population = 0;
                 double groupLong, groupLat;
-                float yAxis = america.left;
-                float xAxis = america.bottom;
-                float gridSquareWidth = (america.right - america.left) / x;
-                float gridSquareHeight = (america.top - america.bottom) / y;
+
+                // grid bounds of query
                 double leftBound = (yAxis + (west - 1) * gridSquareWidth);
                 double rightBound = (yAxis + (east) * gridSquareWidth);
                 double topBound = (xAxis + (north) * gridSquareHeight);
                 double bottomBound = (xAxis + (south - 1) * gridSquareHeight);
+
                 for (int i = lo; i < hi; i++) {
                     group = censusData.data[i];
                     groupLong = group.longitude;
@@ -165,6 +157,12 @@ public class SimpleAndParallel extends PopulationQueryVerison {
 
         Result res = fjPool.invoke(new Preprocessor(0, censusData.data_size));
         america = res.rec;
+
+        yAxis = america.left;
+        xAxis = america.bottom;
+        gridSquareWidth = (america.right - america.left) / x;
+        gridSquareHeight = (america.top - america.bottom) / y;
+
         totalPopulation = res.population;
     }
 }

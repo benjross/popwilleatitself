@@ -8,14 +8,15 @@
  */
 
 /**
- * SimpleAndSequential implements the Implementation interface to provide
+ * SimpleAndSequential extends PopulationQueryVersion to provide
  * functionality for finding information about a population.  The constructor
  * takes in the number of rows, the number of columns, and the CensusData of
  * the population.
  * 
- * @author benross
+ * @author Ben Ross
  */
 public class SimpleAndSequential extends PopulationQueryVerison {
+
     /**
      * Creates a SimpleAndSequential object to provide population query
      * functions.
@@ -37,14 +38,13 @@ public class SimpleAndSequential extends PopulationQueryVerison {
         CensusGroup group;
         int population = 0;
         double groupLong, groupLat;
-        float yAxis = america.left;
-        float xAxis = america.bottom;
-        float gridSquareWidth = (america.right - america.left) / x;
-        float gridSquareHeight = (america.top - america.bottom) / y;
+
+        // Grid bounds ofquery
         double leftBound = (yAxis + (west - 1) * gridSquareWidth);
         double rightBound = (yAxis + (east) * gridSquareWidth);
         double topBound = (xAxis + (north) * gridSquareHeight);
         double bottomBound = (xAxis + (south - 1) * gridSquareHeight);
+
         for (int i = 0; i < censusData.data_size; i++) {
             group = censusData.data[i];
             groupLong = group.longitude;
@@ -83,6 +83,12 @@ public class SimpleAndSequential extends PopulationQueryVerison {
         }
 
         america = rec;
+
+        yAxis = america.left;
+        xAxis = america.bottom;
+        gridSquareWidth = (america.right - america.left) / x;
+        gridSquareHeight = (america.top - america.bottom) / y;
+
         totalPopulation = pop;
     }
 }
