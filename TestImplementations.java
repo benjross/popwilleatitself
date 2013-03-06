@@ -20,14 +20,12 @@ public class TestImplementations {
 	private static final int TIMEOUT = 2000; // 2000 ms = 2 s
 	PopulationQueryVerison imp1; PopulationQueryVerison imp1Other;
 	PopulationQueryVerison imp2; PopulationQueryVerison imp2Other;
-	PopulationQueryVerison impEmpty;
+	PopulationQueryVerison impEmpty; PopulationQueryVerison badBounds;
 	
 	@Before
 	public void setUp() throws Exception {
 		CensusData data = PopulationQuery.parse("CenPop2010.txt");
-		CensusData empty = PopulationQuery.parse("empty.txt");
 		
-		impEmpty = new SimpleAndSequential(20,25,empty);
 		imp1 = new SimpleAndSequential(20,25,data); imp1.preprocess();
 		imp1Other = new SimpleAndSequential(9,14,data); imp1Other.preprocess();
 		imp2 = new SimpleAndParallel(20,25,data); imp2.preprocess();
@@ -87,6 +85,13 @@ public class TestImplementations {
 	
 	@Test(expected = java.lang.NullPointerException.class)
 	public void emptyFileThrows() {
-		impEmpty.preprocess();
+		CensusData empty = PopulationQuery.parse("empty.txt");
+		impEmpty = new SimpleAndSequential(20,25,empty);
+	}
+	
+	@Test(expected = java.lang.IndexOutOfBoundsException.class)
+	public void badBoundsThrows() {
+		CensusData data = PopulationQuery.parse("CenPop2010.txt");
+		badBounds = new SimpleAndSequential(0,25,data);
 	}
 }

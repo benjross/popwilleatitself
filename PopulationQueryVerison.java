@@ -39,6 +39,10 @@ public abstract class PopulationQueryVerison {
      * @param data The CensusData object to be queried
      */
     public PopulationQueryVerison(int x, int y, CensusData data) {
+        if (data == null || data.data_size == 0)
+        	throw new NullPointerException("No population to process - check your file");
+    	if (x < 1 || y < 1)
+    		throw new IndexOutOfBoundsException("positive row/column numbers expected");
         this.x = x;
         this.y = y;
         this.censusData = data;

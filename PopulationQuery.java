@@ -172,10 +172,6 @@ public class PopulationQuery {
      */
     public static void preprocess(String filename, int columns, int rows, int versionNum) {
         CensusData data = parse(filename);
-        if (data == null || data.data_size == 0) {
-        	System.out.println("No population to process - check your file");
-        	System.exit(1);
-        }
         if(versionNum == 1) {
             imp = new SimpleAndSequential(columns, rows, data);
             imp.preprocess();
