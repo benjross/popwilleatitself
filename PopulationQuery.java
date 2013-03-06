@@ -92,19 +92,19 @@ public class PopulationQuery {
 
         int x = Integer.parseInt(xNum);
         int y = Integer.parseInt(yNum);
+        int vNum;
         if(version.equals("-v1")) {
-            preprocess(fileName,x,y,1);
+            vNum = 1;
         } else if(version.equals("-v2")) {
-        	preprocess(fileName,x,y,2);
+        	vNum = 2;
         } else if(version.equals("-v3")) {
-        	preprocess(fileName,x,y,3);
+        	vNum = 3;
         } else if(version.equals("-v4")) {
-        	preprocess(fileName,x,y,4);
-        } else if(version.equals("-v5")) {
-        	preprocess(fileName,x,y,5);
-        } else {
-        	imp = null;
+        	vNum = 4;
+        } else {//(version.equals("-v5"))
+        	vNum = 5;
         }
+        preprocess(fileName,x,y,vNum);
 
         boolean fourArgs = true;
         while(fourArgs) {
@@ -156,8 +156,11 @@ public class PopulationQuery {
      * 		   percent of the total population.
      */
     public static Pair<Integer, Float> singleInteraction(int w, int s, int e, int n) {
+    	float totPop = (float) imp.getPop();
+        if(totPop == 0)
+        	return new Pair<Integer,Float>(0,totPop);
         int areaPop= imp.query(w, s, e, n);
-        return new Pair<Integer, Float>(areaPop, (100*(float)areaPop/(float)imp.getPop() ));
+        return new Pair<Integer, Float>(areaPop, (100*(float)areaPop/totPop));
     }
     
     /**
@@ -172,6 +175,12 @@ public class PopulationQuery {
      */
     public static void preprocess(String filename, int columns, int rows, int versionNum) {
         CensusData data = parse(filename);
+        
+        if (data == null || data.data_size == 0)
+            throw new NullPointerException("No population to process - check your file");
+        if (columns < 1 || rows < 1)
+            throw new IndexOutOfBoundsException("positive row/column numbers expected");
+        
         if(versionNum == 1) {
             imp = new SimpleAndSequential(columns, rows, data);
             imp.preprocess();
@@ -202,7 +211,7 @@ public class PopulationQuery {
      * @param y the number of rows in the grid.
      * @return true if the query is valid, false otherwise.
      */
-    public static boolean queryChecker(int west, int south, int east, int north, int x, int y) {
+    private static boolean queryChecker(int west, int south, int east, int north, int x, int y) {
         return (west < 1 || west > x ||
                 south < 1 || south > y ||
                 east < west || east > x ||

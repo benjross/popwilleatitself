@@ -21,15 +21,18 @@ public class TestImplementations {
 	PopulationQueryVerison imp1; PopulationQueryVerison imp1Other;
 	PopulationQueryVerison imp2; PopulationQueryVerison imp2Other;
 	PopulationQueryVerison impEmpty; PopulationQueryVerison badBounds;
+	PopulationQueryVerison zeroPop;
 	
 	@Before
 	public void setUp() throws Exception {
 		CensusData data = PopulationQuery.parse("CenPop2010.txt");
+		CensusData zero = PopulationQuery.parse("zeroPop.txt");
 		
 		imp1 = new SimpleAndSequential(20,25,data); imp1.preprocess();
 		imp1Other = new SimpleAndSequential(9,14,data); imp1Other.preprocess();
 		imp2 = new SimpleAndParallel(20,25,data); imp2.preprocess();
 		imp2Other = new SimpleAndParallel(9,14,data); imp2Other.preprocess();
+		zeroPop = new SimpleAndSequential(20,25,zero); zeroPop.preprocess();
 	}
 	
 	@Test(timeout = TIMEOUT)
@@ -81,6 +84,11 @@ public class TestImplementations {
 		
 		assertEquals(imp1Other.query(6, 3, 8, 4), 105349619);
 		assertEquals(imp2Other.query(6, 3, 8, 4), 105349619);
+	}
+	
+	@Test(timeout = TIMEOUT)
+	public void testZeroPop() {
+		assertEquals(zeroPop.query(1, 1, 20, 25), 0);
 	}
 	
 	@Test(expected = java.lang.NullPointerException.class)
