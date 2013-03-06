@@ -20,10 +20,14 @@ public class TestImplementations {
 	private static final int TIMEOUT = 2000; // 2000 ms = 2 s
 	PopulationQueryVerison imp1; PopulationQueryVerison imp1Other;
 	PopulationQueryVerison imp2; PopulationQueryVerison imp2Other;
+	PopulationQueryVerison impEmpty;
 	
 	@Before
 	public void setUp() throws Exception {
 		CensusData data = PopulationQuery.parse("CenPop2010.txt");
+		CensusData empty = PopulationQuery.parse("empty.txt");
+		
+		impEmpty = new SimpleAndSequential(20,25,empty);
 		imp1 = new SimpleAndSequential(20,25,data); imp1.preprocess();
 		imp1Other = new SimpleAndSequential(9,14,data); imp1Other.preprocess();
 		imp2 = new SimpleAndParallel(20,25,data); imp2.preprocess();
@@ -79,5 +83,10 @@ public class TestImplementations {
 		
 		assertEquals(imp1Other.query(6, 3, 8, 4), 105349619);
 		assertEquals(imp2Other.query(6, 3, 8, 4), 105349619);
+	}
+	
+	@Test(expected = java.lang.NullPointerException.class)
+	public void emptyFileThrows() {
+		impEmpty.preprocess();
 	}
 }
