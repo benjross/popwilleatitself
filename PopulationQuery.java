@@ -188,7 +188,8 @@ public class PopulationQuery {
         	imp = new SimpleAndParallel(columns, rows, data);
         	imp.preprocess();
         } else if (versionNum == 3) {
-        	imp = null;
+        	imp = new SmarterAndSequential(columns, rows, data);
+        	imp.preprocess();
         } else if (versionNum == 4) {
         	imp = null;
         } else if (versionNum == 5) {
