@@ -1,15 +1,16 @@
+
 import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.RecursiveTask;
 
 
 public class SmarterAndParallel extends SmarterQueryVersion {
 
 	public SmarterAndParallel(int x, int y, CensusData data) {
 		super(x, y, data);
-		// TODO Auto-generated constructor stub
 	}
 	
 	@SuppressWarnings("serial")
-	class SmarterPreprocessor extends RecursiveAction{
+	class SmarterPreprocessor extends RecursiveTask<int[][]>{
 	       int hi, lo;
 
 	        // Look at data from lo (inlcusive) to hi (exclusive)
@@ -19,23 +20,70 @@ public class SmarterAndParallel extends SmarterQueryVersion {
 	        }
 
 		@Override
-        protected void compute() {
+        protected int[][] compute() {
             if(hi - lo <  cutoff) {
                 CensusGroup group;
                 int row, col;
+                int[][] g = new int[x][y];
+                
                 for (int i = lo; i < hi; i++) {
                     group = censusData.data[i];
                     col = (int) ((group.latitude - xAxis) / gridSquareHeight);
                     col = (col == y ?  y - 1: col); // edge case
                     row = (int) ((group.longitude - yAxis) / gridSquareWidth);
                     row = (row == x ? x - 1 : row); // edge case
-                    grid[row][col] += group.population;
-                    
+                    g[row][col] += group.population;
                 }
+                return g;
 
             } else {
                 SmarterPreprocessor left = new SmarterPreprocessor(lo, (hi+lo)/2);
                 SmarterPreprocessor right = new SmarterPreprocessor((hi+lo)/2, hi);
+
+                left.fork(); // fork a thread and calls compute
+                int[][] gRight = right.compute();//call compute directly
+                int[][] gLeft = left.join();
+                int[][] g = new int[x][y];
+//                for(int i = 0; i < g.length; i++) {
+//                	for(int j = 0; j < (g[i].length); j++) {
+//                		g[i][j] = gLeft[i][j]+gRight[i][j];
+//                	}
+//                }
+                fjPool.invoke(new AddGrids(0, x, 0, y, g, gLeft, gRight));
+                return g;
+            }
+
+        }
+	}
+	
+	@SuppressWarnings("serial")
+	class AddGrids extends RecursiveAction{
+	       int xhi, xlo, yhi, ylo;
+	       int[][] g, l, r;
+
+	        // Look at data from lo (inlcusive) to hi (exclusive)
+	        AddGrids(int xlo, int xhi, int ylo, int yhi, int[][] g, int[][] l, int[][] r) {
+	            this.xlo  = xlo;
+	            this.xhi = xhi;
+	            this.ylo = ylo;
+	            this.yhi = yhi;
+	            this.g = g;
+	            this.l = l;
+	            this.r = r;
+	        }
+
+		@Override
+        protected void compute() {
+			int cutoff = (int) Math.pow(10, -1 + Math.floor(Math.log((xhi-xlo)*(yhi-ylo)))) + 10;
+            if((xhi-xlo)*(yhi-ylo) <  cutoff) {
+                for(int i = xlo; i < xhi; i++) {
+                	for(int j = ylo; j < yhi; j++) {
+                		g[i][j] = l[i][j]+r[i][j];
+                	}
+                }
+            } else {
+                AddGrids left = new AddGrids(xlo, (xhi+xlo)/2, ylo, yhi, g, l, r);
+                AddGrids right = new AddGrids((xhi+xlo)/2, xhi, ylo, yhi, g, l, r);
 
                 left.fork(); // fork a thread and calls compute
                 right.compute();//call compute directly
@@ -43,16 +91,12 @@ public class SmarterAndParallel extends SmarterQueryVersion {
             }
 
         }
-		// make this parallel
-
 	}
 	
 	@Override
 	public void preprocess() {
 		super.preprocess();
-		
-		fjPool.invoke(new SmarterPreprocessor(0, censusData.data_size));
-        
+		grid = fjPool.invoke(new SmarterPreprocessor(0, censusData.data_size));
         // sum top edge (of graph)
         for (int i = 1; i < grid.length; i++) {
         	grid[i][grid[0].length - 1] += grid [i - 1][grid[0].length - 1];
@@ -69,6 +113,7 @@ public class SmarterAndParallel extends SmarterQueryVersion {
         		grid[i][j] += (grid[i-1][j] + grid[i][j+1] - grid[i-1][j+1]);
         	}
         }
+        
 	}
 
 }
