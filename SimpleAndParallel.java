@@ -85,16 +85,18 @@ public class SimpleAndParallel extends PopulationQueryVerison {
     // An internal class for querying
     @SuppressWarnings("serial")
     class Query extends RecursiveTask<Integer> {
-        int hi, lo, west, south, east, north;
+        int hi, lo;
+        double leftBound, rightBound, topBound, bottomBound;
 
         // Look at data from lo (inclusive) to hi (exclusive)
-        Query(int lo, int hi, int west, int south, int east, int north) {
+        // Query ounded by *Bound fields
+        Query(int lo, int hi, double leftBound, double rightBound, double topBound, double bottomBound) {
             this.lo  = lo;
             this.hi = hi;
-            this.west = west;
-            this.south = south;
-            this.east = east;
-            this.north = north;
+            this.leftBound = leftBound;
+            this.rightBound = rightBound;
+            this.topBound = topBound;
+            this.bottomBound = bottomBound;
         }
 
         /** {@inheritDoc} */
@@ -104,12 +106,6 @@ public class SimpleAndParallel extends PopulationQueryVerison {
                 CensusGroup group;
                 int population = 0;
                 double groupLong, groupLat;
-
-                // grid bounds of query
-                double leftBound = (yAxis + (west - 1) * gridSquareWidth);
-                double rightBound = (yAxis + (east) * gridSquareWidth);
-                double topBound = (xAxis + (north) * gridSquareHeight);
-                double bottomBound = (xAxis + (south - 1) * gridSquareHeight);
 
                 for (int i = lo; i < hi; i++) {
                     group = censusData.data[i];
@@ -127,9 +123,9 @@ public class SimpleAndParallel extends PopulationQueryVerison {
                 return population;
             } else {
                 Query left =
-                        new Query(lo, (hi+lo)/2, west, south, east, north);
+                        new Query(lo, (hi+lo)/2, leftBound, rightBound, topBound, bottomBound);
                 Query right =
-                        new Query((hi+lo)/2, hi, west, south, east, north);
+                        new Query((hi+lo)/2, hi, leftBound, rightBound, topBound, bottomBound);
 
                 left.fork(); // fork a thread and calls compute
                 Integer rightAns = right.compute(); // call compute directly
@@ -148,8 +144,12 @@ public class SimpleAndParallel extends PopulationQueryVerison {
     public int query(int west, int south, int east, int north) {
         if (america == null)
             return 0;
+      double leftBound = (yAxis + (west - 1) * gridSquareWidth);
+      double rightBound = (yAxis + (east) * gridSquareWidth);
+      double topBound = (xAxis + (north) * gridSquareHeight);
+      double bottomBound = (xAxis + (south - 1) * gridSquareHeight);
         return fjPool.invoke(
-                new Query(0, censusData.data_size, west, south, east, north));
+                new Query(0, censusData.data_size, leftBound, rightBound, topBound, bottomBound));
     }
 
     /** {@inheritDoc} */
