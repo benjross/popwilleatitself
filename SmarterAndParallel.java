@@ -1,24 +1,48 @@
+/*
+ * Jordan Hazari (Primary Author)
+ * Ben Ross
+ * 3/12/13
+ * CSE 332 AB
+ * Project 3 Part B
+ */
 
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.RecursiveTask;
 
-
+/**
+ * SmarterAndParallel extends SmarterQueryVersion to provide
+ * functionality for finding information about a population.  The constructor
+ * takes in the number of rows, the number of columns, and the CensusData of
+ * the population.
+ * 
+ * @author Jordan Hazari
+ */
 public class SmarterAndParallel extends SmarterQueryVersion {
 
+    /**
+     * Creates a SmarterAndParallel object to provide population query
+     * functions.
+     * 
+     * @param x The number of columns
+     * @param y The number of rows
+     * @param data The CensusData object to be queried
+     */
 	public SmarterAndParallel(int x, int y, CensusData data) {
 		super(x, y, data);
 	}
 	
+	// An internal class for preprocessing
 	@SuppressWarnings("serial")
 	class SmarterPreprocessor extends RecursiveTask<int[][]>{
-	       int hi, lo;
+		int hi, lo;
 
-	        // Look at data from lo (inlcusive) to hi (exclusive)
-	        SmarterPreprocessor(int lo, int hi) {
-	            this.lo  = lo;
-	            this.hi = hi;
-	        }
-
+	    // Look at data from lo (inlcusive) to hi (exclusive)
+	    SmarterPreprocessor(int lo, int hi) {
+	        this.lo  = lo;
+	        this.hi = hi;
+	    }
+	    
+	    /** {@inheritDoc} */
 		@Override
         protected int[][] compute() {
             if(hi - lo <  cutoff) {
@@ -43,13 +67,11 @@ public class SmarterAndParallel extends SmarterQueryVersion {
                 left.fork(); // fork a thread and calls compute
                 int[][] gRight = right.compute();//call compute directly
                 int[][] gLeft = left.join();
-                //int[][] g = new int[x][y];
-//                for(int i = 0; i < g.length; i++) {
-//                	for(int j = 0; j < (g[i].length); j++) {
-//                		g[i][j] = gLeft[i][j]+gRight[i][j];
-//                	}
-//                }
-                fjPool.invoke(new AddGrids(0, x, 0, y, gLeft, gRight));
+    			// find the optimal cutoff, based on grid size
+    			int cutoff = (int) Math.pow(10, -1 + Math.floor(Math.log(x*y))) + 10;
+                
+                // add the two grids together in parallel
+                fjPool.invoke(new AddGrids(0, x, 0, y, gLeft, gRight, cutoff));
                 return gRight;
             }
 
@@ -58,31 +80,39 @@ public class SmarterAndParallel extends SmarterQueryVersion {
 	
 	@SuppressWarnings("serial")
 	class AddGrids extends RecursiveAction{
-	       int xhi, xlo, yhi, ylo;
-	       int[][] l, r;
+	   int xhi, xlo, yhi, ylo, cutoff;
+	   int[][] l, r;
 
-	        // Look at data from lo (inlcusive) to hi (exclusive)
-	        AddGrids(int xlo, int xhi, int ylo, int yhi, int[][] l, int[][] r) {
-	            this.xlo  = xlo;
-	            this.xhi = xhi;
-	            this.ylo = ylo;
-	            this.yhi = yhi;
-	            this.l = l;
-	            this.r = r;
-	        }
-
+	    /*
+	     * examines data from two grids in the range:
+	     * 
+	     * (xlo,yhi)    ...    (xhi,yhi)
+	     *     .                   .
+	     *     .                   .
+	     *     .                   .
+	     * (xlo,ylo)    ...    (xhi,ylo)
+	     */
+	    AddGrids(int xlo, int xhi, int ylo, int yhi, int[][] l, int[][] r, int cutoff) {
+	        this.xlo  = xlo;
+	        this.xhi = xhi;
+	        this.ylo = ylo;
+	        this.yhi = yhi;
+	        this.l = l;
+	        this.r = r;
+	        this.cutoff = cutoff;
+	    }
+	    
+	    /** {@inheritDoc} */
 		@Override
         protected void compute() {
-			int cutoff = (int) Math.pow(10, -1 + Math.floor(Math.log((xhi-xlo)*(yhi-ylo)))) + 10;
             if((xhi-xlo)*(yhi-ylo) <  cutoff) {
                 for(int i = xlo; i < xhi; i++) {
-                	for(int j = ylo; j < yhi; j++) {
+                	for(int j = ylo; j < yhi; j++)
                 		r[i][j] += l[i][j];
-                	}
                 }
             } else {
-                AddGrids left = new AddGrids(xlo, (xhi+xlo)/2, ylo, yhi, l, r);
-                AddGrids right = new AddGrids((xhi+xlo)/2, xhi, ylo, yhi, l, r);
+                AddGrids left = new AddGrids(xlo, (xhi+xlo)/2, ylo, yhi, l, r, cutoff);
+                AddGrids right = new AddGrids((xhi+xlo)/2, xhi, ylo, yhi, l, r, cutoff);
 
                 left.fork(); // fork a thread and calls compute
                 right.compute();//call compute directly
@@ -92,6 +122,7 @@ public class SmarterAndParallel extends SmarterQueryVersion {
         }
 	}
 	
+	/** {@inheritDoc} */
 	@Override
 	public void preprocess() {
 		super.preprocess();
