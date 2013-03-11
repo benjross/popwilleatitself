@@ -27,14 +27,19 @@ public class TestImplementations {
 	PopulationQueryVerison imp3; PopulationQueryVerison imp3Other;
 	PopulationQueryVerison imp4; PopulationQueryVerison imp4Other;
 	PopulationQueryVerison imp5; PopulationQueryVerison imp5Other;
-	PopulationQueryVerison impEmpty; PopulationQueryVerison badBounds;
+	PopulationQueryVerison impEmpty;
+	PopulationQueryVerison badBounds;
 	PopulationQueryVerison zeroPop;
+	
+	CensusData data;
+	CensusData zero;
+	CensusData empty;
 	
 	@Before
 	public void setUp() throws Exception {
-		CensusData data = PopulationQuery.parse("CenPop2010.txt");
-		CensusData zero = PopulationQuery.parse("zeroPop.txt");
-		CensusData empty = PopulationQuery.parse("empty.txt");
+		data = PopulationQuery.parse("CenPop2010.txt");
+		zero = PopulationQuery.parse("zeroPop.txt");
+		empty = PopulationQuery.parse("empty.txt");
 		
 		imps = new PopulationQueryVerison[5];
 		oImps = new PopulationQueryVerison[5];
@@ -55,7 +60,7 @@ public class TestImplementations {
 		imp5Other = new SmarterAndLockBased(9,14,data); imp5Other.preprocess(); oImps[4] = imp5Other;
 		
 		zeroPop = new SimpleAndSequential(20,25,zero); zeroPop.preprocess();
-		impEmpty = new SimpleAndSequential(20,25,empty);
+		impEmpty = new SimpleAndSequential(20,25,empty); impEmpty.preprocess();
 	}
 	
 	@Test(timeout = TIMEOUT)
@@ -111,9 +116,6 @@ public class TestImplementations {
 	public void testOther() {
 		for(int i = 0; i < oImps.length; i++) {
 			assertEquals(oImps[i].query(5, 5, 7, 5), 18820388);
-		}
-		
-		for(int i = 0; i < oImps.length; i++) {
 			assertEquals(oImps[i].query(6, 3, 8, 4), 105349619);
 		}
 	}
@@ -130,7 +132,6 @@ public class TestImplementations {
 	
 	@Test(expected = java.lang.IndexOutOfBoundsException.class)
 	public void badBoundsThrows() {
-		CensusData data = PopulationQuery.parse("CenPop2010.txt");
 		badBounds = new SimpleAndSequential(0,25,data);
 	}
 }
