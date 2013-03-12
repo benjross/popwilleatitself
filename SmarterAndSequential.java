@@ -1,10 +1,36 @@
+/*
+ * Ben Ross (Primary Author)
+ * Jordan Hazari
+ * 3/12/13
+ * CSE 332 AC
+ * Daniel Jones
+ * Project 3 part B
+ */
 
+/**
+ * SmarterAndSequential extends SmarterQueryVersion to provide
+ * functionality for finding information about a population.  The constructor
+ * takes in the number of rows, the number of columns, and the CensusData of
+ * the population.
+ * 
+ * @author Ben Ross
+ */
 public class SmarterAndSequential extends SmarterQueryVersion {
 
+	
+	 /**
+     * Creates a SmarterAndSequential object to provide population query
+     * functions.
+     * 
+     * @param x The number of columns
+     * @param y The number of rows
+     * @param data The CensusData object to be queried
+     */
 	public SmarterAndSequential(int x, int y, CensusData data) {
 		super(x, y, data);
 	}
 
+	  /** {@inheritDoc} */
 	@Override
 	public void preprocess() {
         if (censusData.data_size == 0)

@@ -70,7 +70,6 @@ public abstract class PopulationQueryVerison {
 
     /**
      * Parses the data file, and counts the total population.
-     * grid.
      * 
      */
     public abstract void preprocess();
@@ -88,10 +87,10 @@ public abstract class PopulationQueryVerison {
     }
 
     /**
-     * Changes the value of the sequential cutoff
+     * Sets the value of the sequential cutoff
      * @param n the new value of the cutoff
      */
-    public void changeCutoff(int n) {
+    public void setCutoff(int n) {
         cutoff = n;
     }
 }

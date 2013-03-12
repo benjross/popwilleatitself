@@ -89,7 +89,7 @@ public class SimpleAndParallel extends PopulationQueryVerison {
         double leftBound, rightBound, topBound, bottomBound;
 
         // Look at data from lo (inclusive) to hi (exclusive)
-        // Query ounded by *Bound fields
+        // Query bounded by *Bound fields
         Query(int lo, int hi, double leftBound, double rightBound, double topBound, double bottomBound) {
             this.lo  = lo;
             this.hi = hi;

@@ -1,12 +1,37 @@
+/*
+ * Ben Ross (Primary Author)
+ * Jordan Hazari
+ * 3/12/13
+ * CSE 332 AC
+ * Daniel Jones
+ * Project 3 part B
+ */
+
 import java.util.concurrent.locks.ReentrantLock;
 
 
-
+/**
+ * SmarterAndSequential extends SmarterQueryVersion to provide
+ * functionality for finding information about a population.  The constructor
+ * takes in the number of rows, the number of columns, and the CensusData of
+ * the population.
+ * 
+ * @author Ben Ross
+ */
 public class SmarterAndLockBased extends SmarterQueryVersion {
 	//private static final int NUM_THREADS = 4;
 	private ReentrantLock[][] locks;
 
 
+
+    /**
+     * Creates a SmarterAndLockBased object to provide population query
+     * functions.
+     * 
+     * @param x The number of columns
+     * @param y The number of rows
+     * @param data The CensusData object to be queried
+     */
 	public SmarterAndLockBased(int x, int y, CensusData data) {
 		super(x, y, data);
 		locks = new ReentrantLock[x][y];
@@ -17,6 +42,7 @@ public class SmarterAndLockBased extends SmarterQueryVersion {
 		}
 	}
 
+    // An internal class for preprocessing
 	class SmarterPreprocessor extends java.lang.Thread {
 	       int hi, lo;
 	        // Look at data from lo (inlcusive) to hi (exclusive)
@@ -27,7 +53,7 @@ public class SmarterAndLockBased extends SmarterQueryVersion {
 
 		@Override
 		public void run() {
-            if(hi - lo <  1000) {
+            if(hi - lo <  cutoff) {
                 CensusGroup group;
                 int row, col, pop;
                 for (int i = lo; i < hi; i++) {
@@ -63,6 +89,7 @@ public class SmarterAndLockBased extends SmarterQueryVersion {
 	}
 
 
+	/** {@inheritDoc} */
 	@Override
 	public void preprocess() {
 		super.preprocess();
