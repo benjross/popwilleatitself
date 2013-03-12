@@ -126,7 +126,7 @@ public class TestImplementations {
 	}
 	
 	@Test(timeout = TIMEOUT)
-	public void emptyFileThrows() {
+	public void emptyFilePopZero() {
 		assertEquals(impEmpty.query(1, 1, 20, 25), 0);
 	}
 	
