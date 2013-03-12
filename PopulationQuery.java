@@ -191,9 +191,11 @@ public class PopulationQuery {
         	imp = new SmarterAndSequential(columns, rows, data);
         	imp.preprocess();
         } else if (versionNum == 4) {
-        	imp = null;
+        	imp = new SmarterAndParallel(columns, rows, data);
+        	imp.preprocess();
         } else if (versionNum == 5) {
-        	imp = null;
+        	imp = new SmarterAndLockBased(columns, rows, data);
+        	imp.preprocess();
         } else {
         	imp = null;
         }

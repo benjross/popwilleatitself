@@ -70,7 +70,6 @@ public class SmarterAndSequential extends SmarterQueryVersion {
             grid[row][col] += group.population;
             
         }
-        
         // sum top edge (of graph)
         for (int i = 1; i < grid.length; i++) {
         	grid[i][grid[0].length - 1] += grid [i - 1][grid[0].length - 1];
