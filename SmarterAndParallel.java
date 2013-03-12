@@ -67,11 +67,9 @@ public class SmarterAndParallel extends SmarterQueryVersion {
                 left.fork(); // fork a thread and calls compute
                 int[][] gRight = right.compute();//call compute directly
                 int[][] gLeft = left.join();
-    			// find the optimal cutoff, based on grid size
-    			int cutoff = (int) Math.pow(10, -1 + Math.floor(Math.log(x*y))) + 10;
                 
                 // add the two grids together in parallel
-                fjPool.invoke(new AddGrids(0, x, 0, y, gLeft, gRight, cutoff));
+                fjPool.invoke(new AddGrids(0, x, gLeft, gRight));
                 return gRight;
             }
 
@@ -80,7 +78,7 @@ public class SmarterAndParallel extends SmarterQueryVersion {
 	
 	@SuppressWarnings("serial")
 	class AddGrids extends RecursiveAction{
-	   int xhi, xlo, yhi, ylo, cutoff;
+	   int xhi, xlo;
 	   int[][] l, r;
 
 	    /*
@@ -92,27 +90,27 @@ public class SmarterAndParallel extends SmarterQueryVersion {
 	     *     .                   .
 	     * (xlo,ylo)    ...    (xhi,ylo)
 	     */
-	    AddGrids(int xlo, int xhi, int ylo, int yhi, int[][] l, int[][] r, int cutoff) {
+	    AddGrids(int xlo, int xhi, int[][] l, int[][] r) {
 	        this.xlo  = xlo;
 	        this.xhi = xhi;
-	        this.ylo = ylo;
-	        this.yhi = yhi;
 	        this.l = l;
 	        this.r = r;
-	        this.cutoff = cutoff;
 	    }
 	    
 	    /** {@inheritDoc} */
 		@Override
         protected void compute() {
-            if((xhi-xlo)*(yhi-ylo) <  cutoff) {
+			// find the optimal cutoff, based on grid size
+//			int cutoff = (int) Math.pow(10, -1 + Math.floor(Math.log(x*y))) + 10;
+			
+            if((xhi-xlo) <  cutoff) {
                 for(int i = xlo; i < xhi; i++) {
-                	for(int j = ylo; j < yhi; j++)
+                	for(int j = 0; j < y; j++)
                 		r[i][j] += l[i][j];
                 }
             } else {
-                AddGrids left = new AddGrids(xlo, (xhi+xlo)/2, ylo, yhi, l, r, cutoff);
-                AddGrids right = new AddGrids((xhi+xlo)/2, xhi, ylo, yhi, l, r, cutoff);
+                AddGrids left = new AddGrids(xlo, (xhi+xlo)/2, l, r);
+                AddGrids right = new AddGrids((xhi+xlo)/2, xhi, l, r);
 
                 left.fork(); // fork a thread and calls compute
                 right.compute();//call compute directly
