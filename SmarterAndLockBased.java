@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
- * SmarterAndSequential extends SmarterQueryVersion to provide
+ * SmarterAndLockBased extends SmarterQueryVersion to provide
  * functionality for finding information about a population.  The constructor
  * takes in the number of rows, the number of columns, and the CensusData of
  * the population.
@@ -53,7 +53,7 @@ public class SmarterAndLockBased extends SmarterQueryVersion {
 
 		@Override
 		public void run() {
-            if(hi - lo <  cutoff) {
+            if(hi - lo <  1000) {
                 CensusGroup group;
                 int row, col, pop;
                 for (int i = lo; i < hi; i++) {
