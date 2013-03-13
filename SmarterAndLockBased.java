@@ -19,10 +19,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Ben Ross
  */
 public class SmarterAndLockBased extends SmarterQueryVersion {
-	//private static final int NUM_THREADS = 4;
-	private ReentrantLock[][] locks;
-
-
+    // Additional grid to maintain locks for threads
+    private final ReentrantLock[][] locks;
 
     /**
      * Creates a SmarterAndLockBased object to provide population query
@@ -32,43 +30,51 @@ public class SmarterAndLockBased extends SmarterQueryVersion {
      * @param y The number of rows
      * @param data The CensusData object to be queried
      */
-	public SmarterAndLockBased(int x, int y, CensusData data) {
-		super(x, y, data);
-		locks = new ReentrantLock[x][y];
-		for (int i = 0; i < x; i++) {
-			for (int j = 0; j < y; j++) {
-				locks[i][j] = new ReentrantLock();
-			}
-		}
-	}
+    public SmarterAndLockBased(int x, int y, CensusData data) {
+        super(x, y, data);
+        locks = new ReentrantLock[x][y];
+        for (int i = 0; i < x; i++) {
+            for (int j = 0; j < y; j++) {
+                locks[i][j] = new ReentrantLock();
+            }
+        }
+    }
 
     // An internal class for preprocessing
-	class SmarterPreprocessor extends java.lang.Thread {
-	       int hi, lo;
-	        // Look at data from lo (inlcusive) to hi (exclusive)
-	        SmarterPreprocessor(int lo, int hi) {
-	            this.lo  = lo;
-	            this.hi = hi;
-	        }
+    class SmarterPreprocessor extends java.lang.Thread {
+        int hi, lo;
+        // Look at data from lo (inlcusive) to hi (exclusive)
+        SmarterPreprocessor(int lo, int hi) {
+            this.lo  = lo;
+            this.hi = hi;
+        }
 
-		@Override
-		public void run() {
-            if(hi - lo <  1000) {
+        /** {@inheritDoc} */
+        @Override
+        public void run() {
+            if(hi - lo <  cutoff) {
                 CensusGroup group;
-                int row, col, pop;
+                int row, col;
                 for (int i = lo; i < hi; i++) {
                     group = censusData.data[i];
                     col = (int) ((group.latitude - xAxis) / gridSquareHeight);
-                    col = (col == y ?  y - 1: col); // edge case
+                    // Default to North
+                    if (group.latitude >= (col + 1) * gridSquareHeight + xAxis)
+                        col++;
+                    col = (col == y ?  y - 1: col); // edge case due to rounding
                     row = (int) ((group.longitude - yAxis) / gridSquareWidth);
-                    row = (row == x ? x - 1 : row); // edge case
-                    pop = group.population;
+                    // Default to East
+                    if (group.longitude >= (row + 1) * gridSquareWidth + yAxis)
+                        col++;
+                    row = (row == x ? x - 1 : row); // edge case due to rounding
+
+                    // lock it up
                     locks[row][col].lock();
                     try {
-                    	grid[row][col] += pop;
+                        grid[row][col] += group.population;
                     } finally {
-                    	locks[row][col].unlock();
-                    }    
+                        locks[row][col].unlock();
+                    }
                 }
 
             } else {
@@ -76,43 +82,43 @@ public class SmarterAndLockBased extends SmarterQueryVersion {
                 SmarterPreprocessor right = new SmarterPreprocessor((hi+lo)/2, hi);
 
                 left.start(); // fork a thread and calls compute
-                right.run();//call compute directly
+                right.run(); //call compute directly
                 try {
-					left.join();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+                    left.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
 
         }
 
-	}
+    }
 
 
-	/** {@inheritDoc} */
-	@Override
-	public void preprocess() {
-		super.preprocess();
-		
-		SmarterPreprocessor sp = new SmarterPreprocessor(0, censusData.data_size);
-		sp.run();
-        
+    /** {@inheritDoc} */
+    @Override
+    public void preprocess() {
+        super.preprocess();
+
+        SmarterPreprocessor sp = new SmarterPreprocessor(0, censusData.data_size);
+        sp.run();
+
         // sum top edge (of graph)
         for (int i = 1; i < grid.length; i++) {
-        	grid[i][grid[0].length - 1] += grid [i - 1][grid[0].length - 1];
+            grid[i][grid[0].length - 1] += grid [i - 1][grid[0].length - 1];
         }
-        
+
         // sum left edge (of graph)
         for (int i = grid[0].length - 2; i >= 0; i--) {
-        	grid[0][i] += grid [0][i + 1];
+            grid[0][i] += grid [0][i + 1];
         }
-        
-        
+
+        //  second step of grid addition
         for (int j = grid[0].length - 1 - 1; j >= 0; j--) {
-        	for (int i = 1; i < grid.length; i++) {
-        		grid[i][j] += (grid[i-1][j] + grid[i][j+1] - grid[i-1][j+1]);
-        	}
+            for (int i = 1; i < grid.length; i++) {
+                grid[i][j] += (grid[i-1][j] + grid[i][j+1] - grid[i-1][j+1]);
+            }
         }
-	}
+    }
 
 }

@@ -17,8 +17,8 @@
  */
 public class SmarterAndSequential extends SmarterQueryVersion {
 
-	
-	 /**
+
+    /**
      * Creates a SmarterAndSequential object to provide population query
      * functions.
      * 
@@ -26,19 +26,19 @@ public class SmarterAndSequential extends SmarterQueryVersion {
      * @param y The number of rows
      * @param data The CensusData object to be queried
      */
-	public SmarterAndSequential(int x, int y, CensusData data) {
-		super(x, y, data);
-	}
+    public SmarterAndSequential(int x, int y, CensusData data) {
+        super(x, y, data);
+    }
 
-	  /** {@inheritDoc} */
-	@Override
-	public void preprocess() {
+    /** {@inheritDoc} */
+    @Override
+    public void preprocess() {
         if (censusData.data_size == 0)
             return;
 
         int pop = 0;
         CensusGroup group = censusData.data[0];
-        
+
         Rectangle rec = new Rectangle(group.longitude, group.longitude,
                 group.latitude, group.latitude), temp;
         pop += group.population;
@@ -59,35 +59,41 @@ public class SmarterAndSequential extends SmarterQueryVersion {
         gridSquareHeight = (america.top - america.bottom) / y;
 
         totalPopulation = pop;
-        int row, col; 
+        int row, col;
 
         for (int i = 0; i < censusData.data_size; i++) {
             group = censusData.data[i];
             col = (int) ((group.latitude - xAxis) / gridSquareHeight);
-            col = (col == y ?  y - 1: col); // edge case
+            // Default to North
+            if (group.latitude >= (col + 1) * gridSquareHeight + xAxis)
+                col++;
+            col = (col == y ?  y - 1: col); // edge case due to rounding
             row = (int) ((group.longitude - yAxis) / gridSquareWidth);
-            row = (row == x ? x - 1 : row); // edge case
+            // Default to East
+            if (group.longitude >= (row + 1) * gridSquareWidth + yAxis)
+                col++;
+            row = (row == x ? x - 1 : row); // edge case due to rounding
             grid[row][col] += group.population;
-            
+
         }
-        
+
         // sum top edge (of graph)
         for (int i = 1; i < grid.length; i++) {
-        	grid[i][grid[0].length - 1] += grid [i - 1][grid[0].length - 1];
+            grid[i][grid[0].length - 1] += grid [i - 1][grid[0].length - 1];
         }
-        
+
         // sum left edge (of graph)
         for (int i = grid[0].length - 2; i >= 0; i--) {
-        	grid[0][i] += grid [0][i + 1];
+            grid[0][i] += grid [0][i + 1];
         }
-        
+
         //  second step of grid addition
         for (int j = grid[0].length - 1 - 1; j >= 0; j--) {
-        	for (int i = 1; i < grid.length; i++) {
-        		grid[i][j] += (grid[i-1][j] + grid[i][j+1] - grid[i-1][j+1]);
-        	}
+            for (int i = 1; i < grid.length; i++) {
+                grid[i][j] += (grid[i-1][j] + grid[i][j+1] - grid[i-1][j+1]);
+            }
         }
-        
-	}
+
+    }
 
 }

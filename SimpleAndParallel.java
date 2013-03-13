@@ -1,7 +1,7 @@
 /*
  * Ben Ross (Primary Author)
  * Jordan Hazari
- * 3/5/13
+ * 3/12/13
  * CSE 332 AC
  * Daniel Jones
  * Project 3 part A
@@ -113,10 +113,11 @@ public class SimpleAndParallel extends PopulationQueryVerison {
                     groupLat = group.latitude;
                     // Defaults to North and/or East in case of tie
                     if (groupLat >= bottomBound &&
-                            groupLat <= topBound &&
-                            groupLong <= rightBound &&
-                            groupLong >= leftBound
-                            )
+                            (groupLat < topBound ||
+                                    (topBound - america.top) >= 0) &&
+                                    (groupLong < rightBound ||
+                                            (rightBound - america.right) >= 0) &&
+                                            groupLong >= leftBound)
                         population += group.population;
                 }
 
@@ -144,10 +145,10 @@ public class SimpleAndParallel extends PopulationQueryVerison {
     public int query(int west, int south, int east, int north) {
         if (america == null)
             return 0;
-      double leftBound = (yAxis + (west - 1) * gridSquareWidth);
-      double rightBound = (yAxis + (east) * gridSquareWidth);
-      double topBound = (xAxis + (north) * gridSquareHeight);
-      double bottomBound = (xAxis + (south - 1) * gridSquareHeight);
+        double leftBound = (yAxis + (west - 1) * gridSquareWidth);
+        double rightBound = (yAxis + (east) * gridSquareWidth);
+        double topBound = (xAxis + (north) * gridSquareHeight);
+        double bottomBound = (xAxis + (south - 1) * gridSquareHeight);
         return fjPool.invoke(
                 new Query(0, censusData.data_size, leftBound, rightBound, topBound, bottomBound));
     }
